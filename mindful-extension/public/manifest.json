@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Mindful Surf",
+  "version": "1.0",
+  "description": "Block distractions and replace them with mindful activities.",
+  "permissions": ["storage", "tabs", "scripting", "webNavigation"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.instagram.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "index.html"
+  },
+  "icons": {
+    "128": "vite.svg"
+  }
+}
