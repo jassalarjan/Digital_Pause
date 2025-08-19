@@ -1,23 +1,27 @@
 {
   "manifest_version": 3,
-  "name": "Mindful Surf",
+  "name": "My Mindful Extension",
   "version": "1.0",
-  "description": "Block distractions and replace them with mindful activities.",
-  "permissions": ["storage", "tabs", "scripting", "webNavigation"],
+  "description": "Block distracting sites or sections and replace them with mindful activities 🌿",
+  "permissions": ["storage", "scripting", "tabs", "webNavigation"],
+  "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "background.js"
   },
-  "content_scripts": [
-    {
-      "matches": ["*://*.instagram.com/*"],
-      "js": ["content.js"],
-      "run_at": "document_idle"
-    }
-  ],
   "action": {
-    "default_popup": "index.html"
+    "default_popup": "options.html",
+    "default_icon": {
+      "128": "icons/icon128.png"
+    }
   },
   "icons": {
-    "128": "vite.svg"
-  }
+    "128": "icons/icon128.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"]
+    }
+  ],
+  "options_page": "options.html"
 }
