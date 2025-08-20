@@ -1,7 +1,12 @@
+/* ----------------------------
+   NAVIGATION
+----------------------------- */
 nav {
-  background-color: #2e7d32;
-  color: white;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  background-color: #5c3d2e; /* earthy brown */
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  border-bottom-left-radius: 14px;
+  border-bottom-right-radius: 14px;
 }
 
 .nav-container {
@@ -21,28 +26,25 @@ nav ul {
 
 nav ul li {
   cursor: pointer;
+  font-weight: 500;
   transition: color 0.2s ease;
 }
 
 nav ul li:hover {
-  color: #c8e6c9;
+  color: #f5e6d3;
 }
 
-.app-container {
-  font-family: sans-serif;
-  padding: 20px;
-  background: linear-gradient(to bottom right, #e8f5e9, #c8e6c9);
-  min-height: 100vh;
-}
-
+/* ----------------------------
+   BREATHING CIRCLE
+----------------------------- */
 .breathing-circle {
-  width: 150px;
-  height: 150px;
-  background-color: #81c784;
+  width: 160px;
+  height: 160px;
+  background-color: #d7b899;
   border-radius: 50%;
   animation: pulse 5s ease-in-out infinite;
   margin: 20px auto;
-  box-shadow: 0 0 20px rgba(129, 199, 132, 0.6);
+  box-shadow: 0 0 25px rgba(215, 184, 153, 0.6);
 }
 
 @keyframes pulse {
@@ -51,24 +53,22 @@ nav ul li:hover {
   100% { transform: scale(1); opacity: 0.8; }
 }
 
-.quote {
-  font-style: italic;
-  text-align: center;
-  margin-top: 20px;
+/* ----------------------------
+   GLOBAL TYPOGRAPHY
+----------------------------- */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Merriweather', serif;
+  background: linear-gradient(to bottom right, #fdf6ec, #e0d3c0);
+  color: #3b3b3b;
 }
 
-.timer {
-  text-align: center;
-  font-size: 1.5rem;
-}
-
-textarea {
-  width: 100%;
-  padding: 10px;
-}
-
-.stretch {
-  font-size: 1.2rem;
-  text-align: center;
-  margin-top: 20px;
+/* ----------------------------
+   RESPONSIVE
+----------------------------- */
+@media (max-width: 600px) {
+  nav ul {
+    gap: 1rem;
+  }
 }
