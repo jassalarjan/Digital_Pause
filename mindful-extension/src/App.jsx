@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./app.css";
-import positionImg from "./assets/position.jpeg"; // background image
+import yogaImg from "./assets/yoga.png"; // ✅ background image
 
 const exercises = [
   { name: "Breathing Exercise", description: "Breathe deeply for 30 seconds.", duration: 30 },
@@ -39,19 +39,31 @@ export default function App() {
   const startExercise = () => {
     const randomExercise = exercises[Math.floor(Math.random() * exercises.length)];
     setExercise(randomExercise);
-    setTimeLeft(randomExercise.duration); // set exercise duration
+    setTimeLeft(randomExercise.duration);
     setIsRunning(true);
     setStage("exercise");
   };
 
   return (
-    <div className="app-container fade-in">
+    <div
+      className="app-container fade-in"
+      style={{
+        backgroundImage: `url(${yogaImg})`, // ✅ background on full page
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        minHeight: "100vh",
+        color: "white",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+      }}
+    >
       {/* Sanskrit Header */}
       <header className="sanskrit-header">{shlok}</header>
 
       {/* Start Screen */}
       {stage === "start" && (
-        <main className="start-container">
+        <main className="start-container" style={{ textAlign: "center" }}>
           <h2>Welcome to Wellness Break</h2>
           <p>Take a mindful pause and refresh yourself with a short exercise.</p>
           <button className="next-btn" onClick={startExercise}>
@@ -62,60 +74,35 @@ export default function App() {
 
       {/* Exercise Screen */}
       {stage === "exercise" && exercise && (
-        <main
-          className="exercise-container"
-          style={{
-            backgroundImage: `url(${positionImg})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            borderRadius: "16px",
-            padding: "2rem",
-            color: "white",
-            minHeight: "60vh",
-          }}
-        >
+        <main className="exercise-container" style={{ textAlign: "center" }}>
           <h2>{exercise.name}</h2>
           <p>{exercise.description}</p>
-
-          {/* Timer */}
           <h3 className="timer">{timeLeft} sec</h3>
-
-          {timeLeft === 0 ? (
-            <button
-              className="next-btn"
-              onClick={() => setStage("redirectCheck")}
-            >
+          {timeLeft === 0 && (
+            <button className="next-btn" onClick={() => setStage("redirectCheck")}>
               Done
             </button>
-          ) : null}
+          )}
         </main>
       )}
 
       {/* Redirect Check */}
       {stage === "redirectCheck" && (
         <main className="redirect-check" style={{ textAlign: "center" }}>
-          <h2>
-            This platform will ruin your mental health. Still you wanna
-            continue?
-          </h2>
+          <h2>This platform will ruin your mental health. Still you wanna continue?</h2>
           <button
             className="no"
-            onClick={() =>
-              window.open("https://www.wikipedia.org", "_blank")
-            }
+            onClick={() => window.open("https://www.wikipedia.org", "_blank")}
           >
             No
           </button>
-          <button
-            className="yes"
-            onClick={() => alert("Redirecting to your choice...")}
-          >
+          <button className="yes" onClick={() => alert("Redirecting to your choice...")}>
             Yes
           </button>
         </main>
       )}
 
-      {/* Footer Translation */}
+      {/* Footer */}
       <footer className="translation-footer">{translation}</footer>
     </div>
   );
