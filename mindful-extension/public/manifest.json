@@ -9,13 +9,13 @@
     "service_worker": "background.js"
   },
   "action": {
-    "default_popup": "options.html",
+    "default_popup": "index.html",
     "default_icon": {
-      "128": "icons/icon128.png"
+      "128": "vite.svg"
     }
   },
   "icons": {
-    "128": "icons/icon128.png"
+    "128": "vite.svg"
   },
   "content_scripts": [
     {
@@ -23,5 +23,5 @@
       "js": ["content.js"]
     }
   ],
-  "options_page": "options.html"
+  "options_page": "index.html"
 }
