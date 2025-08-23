@@ -1,18 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./app.css";
-import yogaImg from "./assets/yoga.png"; // ✅ background image
-
-const exercises = [
-  { name: "Breathing Exercise", description: "Breathe deeply for 30 seconds.", duration: 30 },
-  { name: "Neck Stretch", description: "Gently stretch your neck side to side.", duration: 20 },
-  { name: "Shoulder Rolls", description: "Roll shoulders forward and backward.", duration: 25 },
-  { name: "Forward Bend", description: "Bend forward and relax for 20 seconds.", duration: 20 },
-  { name: "Seated Twist", description: "Twist gently to each side.", duration: 20 },
-  { name: "Ankle Rotations", description: "Rotate each ankle in circles.", duration: 15 },
-  { name: "Palm Press", description: "Press your palms together for 15 seconds, release and repeat.", duration: 15 },
-  { name: "Wrist Stretch", description: "Stretch wrists gently forward and backward.", duration: 15 },
-  { name: "Side Stretch", description: "Lift arms and stretch side to side.", duration: 20 }
-];
+import logo from "./assets/DP.png"; // ✅ tumhara logo
+import exercises from "./exercises"; // ✅ imported from exercises.js
 
 export default function App() {
   const shlok =
@@ -37,7 +26,8 @@ export default function App() {
   }, [isRunning, timeLeft]);
 
   const startExercise = () => {
-    const randomExercise = exercises[Math.floor(Math.random() * exercises.length)];
+    const randomExercise =
+      exercises[Math.floor(Math.random() * exercises.length)];
     setExercise(randomExercise);
     setTimeLeft(randomExercise.duration);
     setIsRunning(true);
@@ -45,25 +35,18 @@ export default function App() {
   };
 
   return (
-    <div
-      className="app-container fade-in"
-      style={{
-        backgroundImage: `url(${yogaImg})`, // ✅ background on full page
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        minHeight: "100vh",
-        color: "white",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-      }}
-    >
+    <div className="app-container fade-in">
+      {/* Logo Section */}
+      <div className="logo-wrapper">
+        <img src={logo} alt="App Logo" className="app-logo" />
+      </div>
+
       {/* Sanskrit Header */}
       <header className="sanskrit-header">{shlok}</header>
 
       {/* Start Screen */}
       {stage === "start" && (
-        <main className="start-container" style={{ textAlign: "center" }}>
+        <main className="start-container">
           <h2>Welcome to Wellness Break</h2>
           <p>Take a mindful pause and refresh yourself with a short exercise.</p>
           <button className="next-btn" onClick={startExercise}>
@@ -74,12 +57,14 @@ export default function App() {
 
       {/* Exercise Screen */}
       {stage === "exercise" && exercise && (
-        <main className="exercise-container" style={{ textAlign: "center" }}>
-          <h2>{exercise.name}</h2>
-          <p>{exercise.description}</p>
+        <main className="exercise-container">
+          <exercise.component /> {/* ✅ sirf component render hoga, naam duplicate nahi aayega */}
           <h3 className="timer">{timeLeft} sec</h3>
           {timeLeft === 0 && (
-            <button className="next-btn" onClick={() => setStage("redirectCheck")}>
+            <button
+              className="next-btn"
+              onClick={() => setStage("redirectCheck")}
+            >
               Done
             </button>
           )}
@@ -88,15 +73,23 @@ export default function App() {
 
       {/* Redirect Check */}
       {stage === "redirectCheck" && (
-        <main className="redirect-check" style={{ textAlign: "center" }}>
-          <h2>This platform will ruin your mental health. Still you wanna continue?</h2>
+        <main className="redirect-check">
+          <h2>
+            This platform will ruin your mental health. Still you wanna
+            continue?
+          </h2>
           <button
             className="no"
-            onClick={() => window.open("https://www.wikipedia.org", "_blank")}
+            onClick={() =>
+              window.open("https://www.wikipedia.org", "_blank")
+            }
           >
             No
           </button>
-          <button className="yes" onClick={() => alert("Redirecting to your choice...")}>
+          <button
+            className="yes"
+            onClick={() => alert("Redirecting to your choice...")}
+          >
             Yes
           </button>
         </main>
