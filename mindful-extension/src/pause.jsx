@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
+import './App.css';
 import Pause from './components/Pause';
 
 ReactDOM.createRoot(document.getElementById('root')).render(

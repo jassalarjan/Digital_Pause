@@ -11,9 +11,17 @@ const PausePage = () => {
   };
 
   return (
-    <div>
-      {/* Your existing pause page content */}
-      <button onClick={proceedToSite}>Proceed to Site</button>
+    <div className="app-container">
+      <div className="app-header">
+        <h1 className="app-title">Digital Pause</h1>
+        <p className="app-subtitle">Take a moment to breathe before you proceed.</p>
+        <button 
+          onClick={proceedToSite}
+          className="dp-button dp-button-primary"
+        >
+          Proceed to Site
+        </button>
+      </div>
     </div>
   );
 };

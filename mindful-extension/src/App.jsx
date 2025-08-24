@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import './App.css';
 
 function App() {
   const [isEnabled, setIsEnabled] = useState(true);
@@ -7,17 +8,37 @@ function App() {
   const [interventionCount, setInterventionCount] = useState(0);
 
   useEffect(() => {
+    // Load initial settings
     chrome.storage.sync.get(['isEnabled', 'blockedSites'], (result) => {
       setIsEnabled(result.isEnabled !== false);
       setBlockedSites(result.blockedSites || []);
     });
 
-    // Get today's intervention count
-    const today = new Date().toDateString();
-    chrome.storage.local.get(['interventionStats'], (data) => {
-      const stats = data.interventionStats || {};
-      setInterventionCount(stats[today] || 0);
-    });
+    // Load and update intervention count
+    const loadInterventionCount = () => {
+      const today = new Date().toDateString();
+      chrome.storage.local.get(['interventionStats'], (data) => {
+        const stats = data.interventionStats || {};
+        setInterventionCount(stats[today] || 0);
+      });
+    };
+
+    // Load initial count
+    loadInterventionCount();
+
+    // Listen for changes in intervention stats
+    const handleStorageChange = (changes, namespace) => {
+      if (namespace === 'local' && changes.interventionStats) {
+        loadInterventionCount();
+      }
+    };
+
+    chrome.storage.onChanged.addListener(handleStorageChange);
+
+    // Cleanup listener on unmount
+    return () => {
+      chrome.storage.onChanged.removeListener(handleStorageChange);
+    };
   }, []);
 
   const handleToggle = () => {
@@ -43,8 +64,11 @@ function App() {
   };
 
   return (
-    <div className="app-container">
+    <div className="app-container popup-mode">
       <div className="app-header">
+        <div className="header-logo">
+          <img src="/DP.png" alt="Digital Pause" className="logo-image" />
+        </div>
         <h1 className="app-title">Digital Pause</h1>
         <p className="app-subtitle">Mindful browsing starts here</p>
       </div>

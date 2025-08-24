@@ -1,89 +1,136 @@
 import React, { useState, useEffect } from 'react';
+import ExerciseManager from './ExerciseManager';
 
 const Pause = () => {
-  const [targetUrl, setTargetUrl] = useState('');
   const [countdown, setCountdown] = useState(15);
-  const [isTimeUp, setIsTimeUp] = useState(false);
+  const [targetUrl, setTargetUrl] = useState('');
+  const [currentExercise, setCurrentExercise] = useState('breathing');
+  const [exerciseCompleted, setExerciseCompleted] = useState(false);
 
   useEffect(() => {
     console.log("Pause page loaded. Fetching data...");
+
+    // Load target URL and settings
     chrome.storage.local.get(['lastVisited'], (data) => {
       if (data && data.lastVisited) {
-        console.log("Successfully retrieved lastVisited URL:", data.lastVisited);
         setTargetUrl(data.lastVisited);
-      } else {
-        console.error("Could not retrieve lastVisited URL from storage.");
+        console.log("Target URL loaded:", data.lastVisited);
       }
     });
+
     chrome.storage.sync.get(['pauseDuration'], (settings) => {
       console.log("Retrieved settings:", settings);
       setCountdown(settings.pauseDuration || 15);
     });
+
+    // Increment intervention count when pause page is shown
+    const incrementInterventionCount = () => {
+      const today = new Date().toDateString();
+      chrome.storage.local.get(['interventionStats'], (data) => {
+        const stats = data.interventionStats || {};
+        const currentCount = stats[today] || 0;
+        const newStats = { ...stats, [today]: currentCount + 1 };
+        chrome.storage.local.set({ interventionStats: newStats });
+        console.log("Intervention count incremented for today:", newStats[today]);
+      });
+    };
+
+    // Increment count when pause page loads
+    incrementInterventionCount();
   }, []);
 
   useEffect(() => {
-    if (countdown > 0) {
-      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-      return () => clearTimeout(timer);
-    } else {
-      setIsTimeUp(true);
-    }
+    if (countdown <= 0) return;
+
+    const timer = setInterval(() => {
+      setCountdown(prev => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
   }, [countdown]);
 
-  const handleProceed = () => {
-    console.log(`Attempting to proceed to: ${targetUrl}`);
+  const handleProceedToSite = () => {
     if (targetUrl) {
-      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-        if (tabs && tabs[0]) {
-          console.log(`Found active tab ${tabs[0].id}. Updating URL...`);
-          chrome.tabs.update(tabs[0].id, { url: targetUrl });
-        } else {
-          console.error("Could not find active tab to update.");
-        }
+      chrome.runtime.sendMessage({
+        action: 'proceedToSite',
+        url: targetUrl
       });
-    } else {
-      console.error("Cannot proceed: targetUrl is empty.");
     }
   };
 
   const handleStayFocused = () => {
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      if (tabs[0]) {
-        chrome.tabs.remove(tabs[0].id);
-      }
+    // Reset countdown and continue with exercises
+    chrome.storage.sync.get(['pauseDuration'], (settings) => {
+      setCountdown(settings.pauseDuration || 15);
     });
+    setExerciseCompleted(false);
   };
 
+  const handleExerciseComplete = () => {
+    setExerciseCompleted(true);
+  };
+
+  const getRandomExercise = () => {
+    const exercises = ['breathing', 'neck', 'shoulders', 'wrists', 'side', 'twist', 'palms', 'forward', 'ankles', 'gk', 'reflection', 'math'];
+    return exercises[Math.floor(Math.random() * exercises.length)];
+  };
+
+  useEffect(() => {
+    // Set a random exercise when component mounts
+    setCurrentExercise(getRandomExercise());
+  }, []);
+
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center items-center text-center p-4">
-      <div className="max-w-md w-full">
-        <h1 className="text-4xl font-bold text-gray-800 mb-4">Digital Pause</h1>
-        <p className="text-lg text-gray-600 mb-8">
-          Take a moment to breathe before you proceed.
-        </p>
-        <div className="mb-8">
-          <div className="text-6xl font-mono text-indigo-600">{countdown}</div>
-          <p className="text-sm text-gray-500">seconds remaining</p>
+    <div className="app-container">
+      <div className="app-header">
+        <div className="header-logo">
+          <img src="/DP.png" alt="Digital Pause" className="logo-image" />
         </div>
-        <div className="flex justify-center space-x-4">
+        <h1 className="app-title">Digital Pause</h1>
+        <p className="app-subtitle">
+          Take a mindful moment before continuing
+        </p>
+      </div>
+
+      {!exerciseCompleted ? (
+        <ExerciseManager
+          timeLeft={countdown}
+          currentExercise={currentExercise}
+          onExerciseComplete={handleExerciseComplete}
+        />
+      ) : (
+        <div className="exercise-section">
+          <div className="exercise-container">
+            <h2 className="exercise-title">Great job!</h2>
+            <p className="exercise-description">
+              You've completed your mindful exercise. Take a moment to reflect on how you feel.
+            </p>
+            
+            <div className="stats-counter">
+              <span className="stats-number">{countdown}</span>
+              <span className="stats-label">seconds remaining</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="exercise-navigation">
+        {countdown > 0 ? (
           <button
             onClick={handleStayFocused}
-            className="px-6 py-3 bg-gray-300 text-gray-800 rounded-lg shadow-md hover:bg-gray-400 transition-colors duration-300"
+            className="dp-button dp-button-primary"
           >
             Stay Focused
           </button>
+        ) : (
           <button
-            onClick={handleProceed}
-            disabled={!isTimeUp}
-            className={`px-6 py-3 text-white rounded-lg shadow-md transition-all duration-300 ${
-              isTimeUp
-                ? 'bg-indigo-600 hover:bg-indigo-700'
-                : 'bg-indigo-300 cursor-not-allowed'
-            }`}
+            onClick={handleProceedToSite}
+            className="dp-button dp-button-primary"
+            disabled={!targetUrl}
           >
             Proceed to Site
           </button>
-        </div>
+        )}
       </div>
     </div>
   );

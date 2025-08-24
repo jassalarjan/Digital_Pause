@@ -18,7 +18,37 @@ const getSettings = () => {
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "proceedToSite") {
-    chrome.tabs.update(sender.tab.id, {url: request.url});
+    console.log("Received proceedToSite request for URL:", request.url);
+    
+    // Temporarily disable blocking for this site
+    getSettings().then(async ({ blockedSites }) => {
+      const url = new URL(request.url);
+      const hostname = url.hostname;
+      
+      // Find which blocked site matches this URL
+      const matchedSite = blockedSites.find(site => 
+        hostname === site || hostname.endsWith('.' + site)
+      );
+      
+      if (matchedSite) {
+        // Remove the rule temporarily
+        const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
+        const existingRuleIds = existingRules.map(rule => rule.id);
+        if (existingRuleIds.length > 0) {
+          await chrome.declarativeNetRequest.updateDynamicRules({ 
+            removeRuleIds: existingRuleIds 
+          });
+        }
+        
+        // Navigate to the site
+        chrome.tabs.update(sender.tab.id, {url: request.url});
+        
+        // Restore rules after a delay
+        setTimeout(updateBlockingRules, 5000);
+      }
+    });
+    
+    return true; // Indicates async response
   }
 });
 
