@@ -1,31 +1,9 @@
-import React from "react";
-import { createRoot } from "react-dom/client";
-import App from "./App";
+// Content script for Digital Pause extension
+// This script runs in the context of web pages and can perform
+// additional actions if needed, but main blocking is handled
+// by declarativeNetRequest in background.js
 
-chrome.storage.sync.get(["blockedSites", "blockedSelectors"], (data) => {
-  const { blockedSites = [], blockedSelectors = [] } = data;
-  const isBlockedSite = blockedSites.some((site) =>
-    window.location.href.includes(site)
-  );
+console.log("Digital Pause content script loaded");
 
-  if (isBlockedSite) {
-    injectApp(document.body); // replace whole page
-  } else {
-    blockedSelectors.forEach((selector) => {
-      const el = document.querySelector(selector);
-      if (el) {
-        injectApp(el);
-      }
-    });
-  }
-});
-
-function injectApp(targetElement) {
-  targetElement.innerHTML = "";
-  const container = document.createElement("div");
-  container.id = "mindful-root";
-  targetElement.appendChild(container);
-
-  const root = createRoot(container);
-  root.render(<App />);
-}
+// You can add additional content script functionality here if needed
+// For example, detecting specific elements on pages and modifying them

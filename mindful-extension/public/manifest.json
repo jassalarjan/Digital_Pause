@@ -1,27 +1,45 @@
 {
   "manifest_version": 3,
-  "name": "My Mindful Extension",
+  "name": "Digital Pause",
   "version": "1.0",
-  "description": "Block distracting sites or sections and replace them with mindful activities 🌿",
-  "permissions": ["storage", "scripting", "tabs", "webNavigation"],
-  "host_permissions": ["<all_urls>"],
+  "description": "Disrupt mindless scrolling by creating a mindful barrier before accessing addictive sites.",
+  "permissions": [
+    "storage",
+    "declarativeNetRequest",
+    "declarativeNetRequestFeedback",
+    "webNavigation",
+    "tabs"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
   "background": {
     "service_worker": "background.js"
   },
   "action": {
     "default_popup": "index.html",
     "default_icon": {
-      "128": "vite.svg"
+      "16": "DP.png",
+      "48": "DP.png",
+      "128": "DP.png"
     }
   },
-  "icons": {
-    "128": "vite.svg"
-  },
-  "content_scripts": [
+  "options_page": "options.html",
+  "web_accessible_resources": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["content.js"]
+      "resources": [
+        "options.html",
+        "pause.html",
+        "assets/*"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
     }
   ],
-  "options_page": "index.html"
+  "icons": {
+    "16": "DP.png",
+    "48": "DP.png",
+    "128": "DP.png"
+  }
 }

@@ -1,102 +1,109 @@
-import React, { useState, useEffect } from "react";
-import "./app.css";
-import logo from "./assets/DP.png"; // ✅ tumhara logo
-import exercises from "./exercises"; // ✅ imported from exercises.js
+import React, { useState, useEffect } from 'react';
 
-export default function App() {
-  const shlok =
-    "यदि ते साधु-व्यसनम् अस्ति, त्वं विजयिष्यसि; यदि ते पाप-व्यसनम् अस्ति, त्वं पराजयिष्यसि।";
-  const translation =
-    "If you have addiction to the right, you will win; but if you have addiction to the bad, you will lose.";
+function App() {
+  const [isEnabled, setIsEnabled] = useState(true);
+  const [blockedSites, setBlockedSites] = useState([]);
+  const [newSite, setNewSite] = useState("");
+  const [interventionCount, setInterventionCount] = useState(0);
 
-  const [exercise, setExercise] = useState(null);
-  const [stage, setStage] = useState("start");
-  const [timeLeft, setTimeLeft] = useState(0);
-  const [isRunning, setIsRunning] = useState(false);
-
-  // timer effect
   useEffect(() => {
-    let timer;
-    if (isRunning && timeLeft > 0) {
-      timer = setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
-      }, 1000);
-    }
-    return () => clearInterval(timer);
-  }, [isRunning, timeLeft]);
+    chrome.storage.sync.get(['isEnabled', 'blockedSites'], (result) => {
+      setIsEnabled(result.isEnabled !== false);
+      setBlockedSites(result.blockedSites || []);
+    });
 
-  const startExercise = () => {
-    const randomExercise =
-      exercises[Math.floor(Math.random() * exercises.length)];
-    setExercise(randomExercise);
-    setTimeLeft(randomExercise.duration);
-    setIsRunning(true);
-    setStage("exercise");
+    // Get today's intervention count
+    const today = new Date().toDateString();
+    chrome.storage.local.get(['interventionStats'], (data) => {
+      const stats = data.interventionStats || {};
+      setInterventionCount(stats[today] || 0);
+    });
+  }, []);
+
+  const handleToggle = () => {
+    const newIsEnabled = !isEnabled;
+    setIsEnabled(newIsEnabled);
+    chrome.storage.sync.set({ isEnabled: newIsEnabled });
+  };
+
+  const handleAddSite = (e) => {
+    e.preventDefault();
+    if (newSite && !blockedSites.includes(newSite)) {
+      const newBlockedSites = [...blockedSites, newSite.trim()];
+      setBlockedSites(newBlockedSites);
+      chrome.storage.sync.set({ blockedSites: newBlockedSites });
+      setNewSite("");
+    }
+  };
+
+  const handleRemoveSite = (siteToRemove) => {
+    const newBlockedSites = blockedSites.filter(site => site !== siteToRemove);
+    setBlockedSites(newBlockedSites);
+    chrome.storage.sync.set({ blockedSites: newBlockedSites });
   };
 
   return (
-    <div className="app-container fade-in">
-      {/* Logo Section */}
-      <div className="logo-wrapper">
-        <img src={logo} alt="App Logo" className="app-logo" />
+    <div className="app-container">
+      <div className="app-header">
+        <h1 className="app-title">Digital Pause</h1>
+        <p className="app-subtitle">Mindful browsing starts here</p>
       </div>
 
-      {/* Sanskrit Header */}
-      <header className="sanskrit-header">{shlok}</header>
+      <div className="stats-counter">
+        <span className="stats-number">{interventionCount}</span>
+        <span className="stats-label">interventions today</span>
+      </div>
 
-      {/* Start Screen */}
-      {stage === "start" && (
-        <main className="start-container">
-          <h2>Welcome to Wellness Break</h2>
-          <p>Take a mindful pause and refresh yourself with a short exercise.</p>
-          <button className="next-btn" onClick={startExercise}>
-            Start Exercise
-          </button>
-        </main>
-      )}
+      <div className="toggle-container">
+        <span className="toggle-label">Extension Enabled</span>
+        <label className="toggle-switch">
+          <input 
+            type="checkbox" 
+            checked={isEnabled} 
+            onChange={handleToggle}
+          />
+          <span className="toggle-slider"></span>
+        </label>
+      </div>
 
-      {/* Exercise Screen */}
-      {stage === "exercise" && exercise && (
-        <main className="exercise-container">
-          <exercise.component /> {/* ✅ sirf component render hoga, naam duplicate nahi aayega */}
-          <h3 className="timer">{timeLeft} sec</h3>
-          {timeLeft === 0 && (
-            <button
-              className="next-btn"
-              onClick={() => setStage("redirectCheck")}
-            >
-              Done
-            </button>
-          )}
-        </main>
-      )}
+      <div className="blocked-sites-list">
+        <h2 className="font-semibold mb-3">Blocked Websites</h2>
+        {blockedSites.length > 0 ? (
+          <div className="space-y-2">
+            {blockedSites.map(site => (
+              <div key={site} className="site-item">
+                <span className="text-sm">{site}</span>
+                <button 
+                  onClick={() => handleRemoveSite(site)} 
+                  className="remove-site-btn"
+                  title="Remove site"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500 text-sm">No sites blocked yet</p>
+        )}
+      </div>
 
-      {/* Redirect Check */}
-      {stage === "redirectCheck" && (
-        <main className="redirect-check">
-          <h2>
-            This platform will ruin your mental health. Still you wanna
-            continue?
-          </h2>
-          <button
-            className="no"
-            onClick={() =>
-              window.open("https://www.wikipedia.org", "_blank")
-            }
-          >
-            No
-          </button>
-          <button
-            className="yes"
-            onClick={() => alert("Redirecting to your choice...")}
-          >
-            Yes
-          </button>
-        </main>
-      )}
+      <form onSubmit={handleAddSite} className="add-site-form">
+        <input 
+          type="text"
+          value={newSite}
+          onChange={(e) => setNewSite(e.target.value)}
+          placeholder="Enter website (e.g., facebook.com)"
+          className="site-input"
+        />
+        <button type="submit" className="add-site-btn">Add</button>
+      </form>
 
-      {/* Footer */}
-      <footer className="translation-footer">{translation}</footer>
+      <a href="options.html" target="_blank" className="settings-link">
+        Open Full Settings →
+      </a>
     </div>
   );
 }
+
+export default App;
